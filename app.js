@@ -19,6 +19,8 @@ function dueVerses(){return state.verses.filter(v=>!v.due||v.due<=today())}
 function render(){
  if(route.screen==="home") return home();
  if(route.screen==="add") return addForm();
+ if(route.screen==="themes") return suggestedThemes();
+ if(route.screen==="search") return bibleSearch();
  if(route.screen==="verses") return verses();
  if(route.screen==="practice") return practice(route.id);
  if(route.screen==="practicePicker") return practicePicker();
@@ -47,8 +49,37 @@ function addForm(){
  <label>Reference</label><div class="row"><input id="ref" placeholder="John 15:5" required><button class="btn" type="button" onclick="fillPassage()">Fill Verse</button></div><div id="lookupmsg" class="tiny">Enter a reference, then tap Fill Verse.</div>
  <label>Translation</label><input id="trans" value="WEBU" readonly>
  <label>Scripture text</label><textarea id="txt" placeholder="WEBU text will fill automatically when available." required></textarea>
- <button class="btn primary wide" type="submit">Save & Start Learning</button></form></div>`)
+ <button class="btn primary wide" type="submit">Save & Start Learning</button></form><div class="discover"><h3>Find a passage</h3><div class="row"><button class="btn" onclick="go('themes')">Browse Suggested Verses</button><button class="btn" onclick="go('search')">Search the Bible</button></div></div></div>`)
 }
+
+const THEME_VERSES={
+ "Anxiety & Peace":["Philippians 4:6-7","Isaiah 41:10","John 14:27"],
+ "Trusting God":["Proverbs 3:5-6","Psalm 37:5","Romans 8:28"],
+ "Strength & Courage":["Joshua 1:9","Isaiah 40:31","Philippians 4:13"],
+ "Faith":["Hebrews 11:1","Mark 11:24","2 Corinthians 5:7"],
+ "God’s Love":["John 3:16","Romans 8:38-39","1 John 4:9-10"],
+ "Forgiveness":["1 John 1:9","Ephesians 4:32","Colossians 3:13"],
+ "Wisdom & Guidance":["James 1:5","Psalm 119:105","Proverbs 16:9"],
+ "Temptation & Sin":["1 Corinthians 10:13","Psalm 119:11","James 1:21"],
+ "Prayer":["Matthew 6:9-13","1 Thessalonians 5:16-18","Jeremiah 33:3"],
+ "Hope":["Romans 15:13","Jeremiah 29:11","Psalm 42:11"],
+ "Gratitude":["1 Thessalonians 5:18","Psalm 100:4-5","Colossians 3:17"],
+ "Who I Am in Christ":["2 Corinthians 5:17","Ephesians 2:10","Galatians 2:20"]
+};
+function suggestedThemes(){
+ let html=Object.entries(THEME_VERSES).map(([theme,refs])=>`<div class="themeGroup"><h3>${esc(theme)}</h3>${refs.map(ref=>{let x=passageFromRef(ref);return `<button class="suggestion" onclick="addSuggested('${ref.replaceAll("'","\\'")}')"><b>${esc(ref)}</b>${x?`<span>${esc(x.text)}</span>`:""}</button>`}).join("")}</div>`).join("");
+ app(`${header(true)}<div class="card"><h2>Suggested Verses by Theme</h2><p class="muted">Choose a passage to add it to your memorization list.</p>${html}</div>`)
+}
+function addSuggested(ref){let x=passageFromRef(ref);if(!x)return alert("That passage could not be found in the installed WEBU Bible.");let existing=state.verses.find(v=>v.reference.toLowerCase()===ref.toLowerCase());if(existing)return go("practice",existing.id);let v={id:"v"+Date.now(),reference:ref,translation:"WEBU",text:x.text,notes:"",status:"new",due:today(),streak:0,created:new Date().toISOString()};state.verses.push(v);save();go("practice",v.id)}
+function bibleSearch(){
+ let q=route.searchQuery||"",results=route.searchResults||[];
+ let body=q?results.length?results.map(r=>`<div class="searchResult"><div class="ref">${esc(r.reference)}</div><p>${highlightTerms(r.text,q)}</p><button class="btn small primary" onclick="addSearchResult('${r.book.replaceAll("'","\\'")}',${r.chapter},${r.verse})">Memorize This Verse</button></div>`).join(""):`<div class="empty">No verses found for “${esc(q)}”. Try another word or phrase.</div>`:`<div class="empty">Search all 66 books of the installed WEBU Bible by a word or phrase.</div>`;
+ app(`${header(true)}<div class="card"><h2>Search the Bible</h2><p class="muted">Searches stay on this device and work offline.</p><form class="searchForm" onsubmit="runBibleSearch(event)"><input id="bibleSearchInput" value="${esc(q)}" placeholder="peace, wisdom, fear, love…" required><button class="btn primary" type="submit">Search</button></form><div class="tiny searchCount">${q?`${results.length}${results.length===100?"+":""} result${results.length===1?"":"s"}`:""}</div>${body}</div>`)
+}
+function runBibleSearch(e){e.preventDefault();let q=document.querySelector("#bibleSearchInput").value.trim();let terms=norm(q).split(" ").filter(Boolean),out=[];if(!terms.length)return;outer:for(const [book,bv] of Object.entries(window.BIBLE_DATA?.books||{})){for(const [chapter,ch] of Object.entries(bv.chapters||{})){for(const [verse,text] of Object.entries(ch)){let n=norm(text);if(terms.every(t=>n.includes(t))){out.push({book,chapter:+chapter,verse:+verse,reference:`${book} ${chapter}:${verse}`,text});if(out.length>=100)break outer}}}}route.searchQuery=q;route.searchResults=out;render()}
+function highlightTerms(text,q){let terms=norm(q).split(" ").filter(Boolean).sort((a,b)=>b.length-a.length);if(!terms.length)return esc(text);let safe=esc(text);for(const t of terms){let re=new RegExp(`(${t.replace(/[.*+?^${}()|[\\]\\]/g,"\\$&")})`,"gi");safe=safe.replace(re,"<mark>$1</mark>")}return safe}
+function addSearchResult(book,chapter,verse){let ref=`${book} ${chapter}:${verse}`,text=window.BIBLE_DATA.books[book].chapters[String(chapter)][String(verse)],existing=state.verses.find(v=>v.reference===ref);if(existing)return go("practice",existing.id);let v={id:"v"+Date.now(),reference:ref,translation:"WEBU",text,notes:"",status:"new",due:today(),streak:0,created:new Date().toISOString()};state.verses.push(v);save();go("practice",v.id)}
+
 function addVerse(e){e.preventDefault();let v={id:"v"+Date.now(),reference:ref.value.trim(),translation:trans.value.trim(),text:txt.value.trim(),notes:"",status:"new",due:today(),streak:0,created:new Date().toISOString()};state.verses.push(v);save();go("practice",v.id)}
 function verses(){
  let items=state.verses.map(v=>`<div class="listItem" onclick="go('practice','${v.id}')"><div><div class="ref">${esc(v.reference)}</div><div class="tiny">${esc(v.translation||"")} · Due ${esc(v.due||"today")}</div></div><span class="badge">${esc(v.status||"new")}</span></div>`).join("");
@@ -69,7 +100,7 @@ function practice(id){
  if(route.mode==="phrase"){let p=phrases(v.text);let n=Math.min(route.phrase,p.length);body=`<div class="tiny">Phrase ${n} of ${p.length}</div><div class="verseText">${esc(p.slice(0,n).join(" "))}</div><div class="row"><button class="btn" onclick="route.phrase=Math.max(1,route.phrase-1);render()">− Phrase</button><button class="btn primary" onclick="route.phrase=Math.min(${p.length},route.phrase+1);render()">+ Phrase</button></div>`}
  if(route.mode==="hide") body=`<div class="tiny">${route.level*25}% hidden</div><div class="verseText">${route.revealed?esc(v.text):hideWords(v.text,route.level)}</div><div class="difficulty"><button class="btn ${route.level===1?"primary":""}" onclick="route.level=1;route.revealed=false;render()">Easier · 25%</button><button class="btn ${route.level===2?"primary":""}" onclick="route.level=2;route.revealed=false;render()">Medium · 50%</button><button class="btn ${route.level===3?"primary":""}" onclick="route.level=3;route.revealed=false;render()">Harder · 75%</button></div><button class="btn outline wide" onclick="route.revealed=!route.revealed;render()">${route.revealed?"Hide Verse":"Reveal Verse"}</button>`;
  if(route.mode==="initials") body=`<div class="verseText">${route.revealed?esc(v.text):esc(initials(v.text))}</div><button class="btn outline wide" onclick="route.revealed=!route.revealed;render()">${route.revealed?"Show First Letters":"Reveal Verse"}</button>`;
- if(route.mode==="flash"){let fw=flashWords(v.text),i=Math.min(route.flashIndex||0,Math.max(0,fw.length-1));route.flashIndex=i;body=`<div class="tiny flashCount">Word ${i+1} of ${fw.length}</div><button class="flashCard" onclick="route.flashRevealed=!route.flashRevealed;render()"><span>${route.flashRevealed?esc(fw[i]||""):"Tap to reveal word"}</span></button><div class="row"><button class="btn" onclick="route.flashIndex=Math.max(0,${i}-1);route.flashRevealed=false;render()" ${i===0?"disabled":""}>← Previous</button><button class="btn primary" onclick="route.flashIndex=Math.min(${max(0,1)},${i}+1);route.flashRevealed=false;render()">Next →</button></div>`;body=body.replace(`Math.min(1,${i}+1)`,`Math.min(${fw.length-1},${i}+1)`).replace('Next →</button>',`${i===fw.length-1?'Start Over ↻':'Next →'}</button>`);if(i===fw.length-1)body=body.replace(`route.flashIndex=Math.min(${fw.length-1},${i}+1)`,`route.flashIndex=0`)}
+ if(route.mode==="flash"){let fw=flashWords(v.text),i=Math.min(route.flashIndex||0,Math.max(0,fw.length-1));route.flashIndex=i;body=`<div class="tiny flashCount">Word ${i+1} of ${fw.length}</div><button class="flashCard" onclick="route.flashRevealed=!route.flashRevealed;render()"><span>${route.flashRevealed?esc(fw[i]||""):"Tap to reveal word"}</span></button><div class="row"><button class="btn" onclick="route.flashIndex=Math.max(0,${i}-1);route.flashRevealed=false;render()" ${i===0?"disabled":""}>← Previous</button><button class="btn primary" onclick="route.flashIndex=Math.min(${fw.length-1},${i}+1);route.flashRevealed=false;render()">Next →</button></div>`;body=body.replace(`Math.min(1,${i}+1)`,`Math.min(${fw.length-1},${i}+1)`).replace('Next →</button>',`${i===fw.length-1?'Start Over ↻':'Next →'}</button>`);if(i===fw.length-1)body=body.replace(`route.flashIndex=Math.min(${fw.length-1},${i}+1)`,`route.flashIndex=0`)}
  if(route.mode==="test") body=route.result?testResult(v,route.result):`<p class="muted">Type the passage from memory. Capitalization and punctuation won't count against you.</p><textarea id="attempt" placeholder="Begin typing from memory…"></textarea><button class="btn primary wide" onclick="checkTest('${v.id}')">Check My Answer</button>`;
  app(`${header(true)}<div class="card"><div class="reference">${esc(v.reference)} · ${esc(v.translation||"")}</div>
  <div class="modebar"><button class="btn small ${route.mode==="learn"?"primary":""}" onclick="setMode('learn')">Learn</button><button class="btn small ${route.mode==="phrase"?"primary":""}" onclick="setMode('phrase')">Phrase Builder</button><button class="btn small ${route.mode==="hide"?"primary":""}" onclick="setMode('hide')">Hide Words</button><button class="btn small ${route.mode==="initials"?"primary":""}" onclick="setMode('initials')">First Letters</button><button class="btn small ${route.mode==="flash"?"primary":""}" onclick="setMode('flash')">Flash Cards</button><button class="btn small ${route.mode==="test"?"primary":""}" onclick="setMode('test')">Test Me</button></div>${body}<button class="btn contextToggle ${route.contextShown?"primary":""}" onclick="route.contextShown=!route.contextShown;render()">${route.contextShown?"Hide Verse in Context":"Show Verse in Context"}</button>${route.contextShown?`<div class="contextBox" onclick="openReader('${v.id}')">${contextHtml(v)}</div>`:""}<div class="notesBox"><h3 class="sectionTitle">My Notes</h3><p class="tiny">Private notes for this passage. Saved automatically on this device.</p><textarea class="noteArea" oninput="saveNote('${v.id}',this.value)" placeholder="Write what you notice, what you want to remember, or how this passage speaks to you…">${esc(v.notes||"")}</textarea></div></div>

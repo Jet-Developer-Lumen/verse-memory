@@ -1,4 +1,4 @@
-const CACHE="verse-memory-v1.4-3-polish";const ASSETS=["./","./index.html","./styles.css","./app.js","./bible-data.js","./lumenstance-mark.png","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
+const CACHE="bible-memory-app-v1.5";const ASSETS=["./","./index.html","./styles.css","./app.js","./bible-data.js","./lumenstance-mark.png","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener("activate",e=>e.waitUntil((async()=>{for(const name of await caches.keys()){if(name!==CACHE)await caches.delete(name)}await self.clients.claim()})()));
 self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{let copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return resp}).catch(()=>caches.match("./index.html")))));

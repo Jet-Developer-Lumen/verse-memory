@@ -1,8 +1,8 @@
-# Bible Memory App V1.4
+# Bible Memory App V1.5
 
 A private, local-first Scripture memorization PWA from LumenStance.
 
-## V1.2 includes
+## V1.5 includes
 - Complete 66-book World English Bible Updated (WEBU) text bundled for offline use
 - Add a verse or passage by reference and auto-fill its WEBU text
 - Read in Context beneath each memorization passage
@@ -24,10 +24,17 @@ World English Bible Updated (WEBU), 66-book canon-only read-aloud chapter packag
 Serve over HTTPS (for example GitHub Pages) so the service worker and installable PWA features work correctly.
 
 
-## V1.3 polish
+## V1.5 polish
 - LumenStance mark moved to the upper-left brand header.
 - Practice Today opens a passage chooser instead of automatically selecting the first due passage.
 - Read in Context is hidden until requested.
 - Hide Words uses explicit Easier / Medium / Harder selection states.
 - Bible Reader touch highlighting is limited to the selected verse.
 - Service worker cache version bumped and old caches are removed on activation.
+
+
+## V1.5 additions
+- LumenStance sage green theme
+- Suggested verses organized by theme
+- Offline full-Bible keyword and phrase search
+- Search results can be added directly to memorization
