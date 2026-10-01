@@ -1,4 +1,4 @@
-# Verse Memory V1.2
+# Bible Memory App V1.4
 
 A private, local-first Scripture memorization PWA from LumenStance.
 
@@ -9,7 +9,7 @@ A private, local-first Scripture memorization PWA from LumenStance.
 - Full Bible Reader with book/chapter navigation
 - Select a verse in the reader and add it to memorization
 - Passage-specific My Notes, saved automatically on the device
-- Learn, Phrase Builder, Hide Words, First Letters, and Test Me practice modes
+- Learn, Phrase Builder, Hide Words, First Letters, Flash Cards, and Test Me practice modes
 - Spaced review feedback: Again, Almost, Got It
 - Local backup and restore
 - LumenStance mark on the home screen
@@ -22,3 +22,12 @@ World English Bible Updated (WEBU), 66-book canon-only read-aloud chapter packag
 
 ## Hosting
 Serve over HTTPS (for example GitHub Pages) so the service worker and installable PWA features work correctly.
+
+
+## V1.3 polish
+- LumenStance mark moved to the upper-left brand header.
+- Practice Today opens a passage chooser instead of automatically selecting the first due passage.
+- Read in Context is hidden until requested.
+- Hide Words uses explicit Easier / Medium / Harder selection states.
+- Bible Reader touch highlighting is limited to the selected verse.
+- Service worker cache version bumped and old caches are removed on activation.

@@ -1,11 +1,11 @@
 {
-  "name": "Verse Memory \u2014 A Gift from LumenStance",
-  "short_name": "Verse Memory",
+  "name": "Bible Memory App \u2014 A Gift from LumenStance",
+  "short_name": "Bible Memory App",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#fffcee",
   "theme_color": "#fffcee",
-  "description": "A private, offline Scripture memorization app.",
+  "description": "A private, offline Bible memorization app with no account and no AI required.",
   "icons": [
     {
       "src": "icon-192.png",
