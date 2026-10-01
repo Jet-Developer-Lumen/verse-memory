@@ -26,3 +26,19 @@ label{display:block;font-weight:650;margin:15px 0 6px}input,textarea,select{widt
 .homeVerse{font-family:Georgia,serif;font-size:17px;line-height:1.55;color:var(--muted);max-width:650px;margin:10px auto 18px}.homeVerse span{white-space:nowrap;font-style:italic}.flashCard{width:100%;min-height:230px;margin:10px 0 14px;border:1px solid var(--gold2);border-radius:20px;background:#fffef8;box-shadow:var(--shadow);font-family:Georgia,serif;font-size:34px;color:var(--ink);display:grid;place-items:center;padding:28px;cursor:pointer}.flashCount{text-align:center;margin-top:8px}.btn:disabled{opacity:.45;cursor:default}
 
 .discover{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}.themeGroup{padding:10px 0 16px;border-bottom:1px solid var(--line)}.themeGroup:last-child{border-bottom:0}.themeGroup h3{margin:5px 0 10px}.suggestion{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fffef8;border-radius:12px;padding:12px 14px;margin:8px 0;color:var(--ink);cursor:pointer}.suggestion b{display:block;color:var(--green);margin-bottom:4px}.suggestion span{display:block;font-family:Georgia,serif;line-height:1.45;color:var(--muted)}.searchForm{display:flex;gap:8px;align-items:center}.searchForm input{flex:1}.searchForm .btn{flex:0 0 auto}.searchCount{margin:10px 0}.searchResult{padding:15px 0;border-bottom:1px solid var(--line)}.searchResult:last-child{border-bottom:0}.searchResult .ref{font-family:Georgia,serif;font-weight:700;color:var(--green)}.searchResult p{font-family:Georgia,serif;line-height:1.55;margin:7px 0 10px}.searchResult mark{background:#dce8d7;border-radius:3px;padding:0 2px}@media(max-width:520px){.searchForm{display:block}.searchForm .btn{width:100%;margin-top:8px}}
+
+/* V1.6 softer LumenStance sage palette */
+:root{--sage:#71866d;--sage-dark:#647a61;--sage-light:#e5ece2;--sage-pale:#f0f4ed;--gold:#71866d;--gold2:#d7e1d4;--green:#647a61}
+.btn{background:var(--sage-light)}
+.btn.primary{background:var(--sage);color:white}
+.btn.outline{border-color:var(--sage);color:var(--sage-dark)}
+.contextToggle{background:var(--sage-light)}
+.notice{background:var(--sage-pale)}
+.contextVerse.focus,.readerVerse.selected{background:#e3ecdf}
+@media (hover:none){.readerVerse.selected:hover{background:#e3ecdf}}
+.readerVerse:hover{background:#eef3eb}
+.wordblank{border-bottom-color:#9daf99}
+.referenceEntry{position:relative;flex:1;min-width:220px}
+.bookSuggestions{position:absolute;z-index:20;left:0;right:0;top:100%;background:#fffef8;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.bookSuggestion{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fffef8;padding:11px 13px;color:var(--ink);cursor:pointer}
+.bookSuggestion:last-child{border-bottom:0}.bookSuggestion:hover{background:var(--sage-pale)}

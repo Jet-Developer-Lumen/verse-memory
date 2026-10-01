@@ -36,45 +36,72 @@ function home(){
  <div class="notice">Everything you enter is stored in this browser on this device. No account is required. No AI.</div>`)
 }
 function practiceDue(){if(state.verses.length)return go("practicePicker");go("add")}
-function practicePicker(){let due=dueVerses(),items=(due.length?due:state.verses).map(v=>`<div class="listItem" onclick="go('practice','${v.id}')"><div><div class="ref">${esc(v.reference)}</div><div class="tiny">${esc(v.translation||"")} · ${due.length?"Due today":"Choose to practice"}</div></div><span class="badge">Practice</span></div>`).join("");app(`${header(true)}<div class="card"><h2>${due.length?"Practice Today’s Verses":"Choose a Passage to Practice"}</h2><p class="muted">Choose the passage you want to work on.</p>${items||`<div class="empty">No passages yet.</div>`}</div>`)}
+function practicePicker(){let due=dueVerses(),items=(due.length?due:state.verses).map(v=>`<div class="listItem" onclick="go('practice','${v.id}')"><div><div class="ref">${esc(v.reference)}</div><div class="tiny">${esc(v.translation||"")} · ${due.length?"Due today":"Choose to practice"}</div></div><span class="badge">Practice</span></div>`).join("");app(`${header(true)}<div class="card"><h2>${due.length?"Practice Today’s Verses":"Choose a Passage to Practice"}</h2><p class="muted">Which passage would you like to spend time with today?</p>${items||`<div class="empty">No passages yet.</div>`}</div>`)}
 function parseRef(ref){
  const m=ref.trim().match(/^(.+?)\s+(\d+):(\d+)(?:\s*[-–]\s*(\d+))?$/); if(!m)return null;
  return {book:m[1].trim(),chapter:+m[2],start:+m[3],end:+(m[4]||m[3])};
 }
 function bookMatch(name){let books=Object.keys(window.BIBLE_DATA?.books||{});return books.find(b=>b.toLowerCase()===name.toLowerCase())}
+function showBookSuggestions(value){
+ const box=document.querySelector("#bookSuggestions"); if(!box)return;
+ const typed=value.trim().toLowerCase(); if(!typed||/\d/.test(typed)){box.innerHTML="";return}
+ const matches=Object.keys(window.BIBLE_DATA?.books||{}).filter(b=>b.toLowerCase().startsWith(typed)).slice(0,8);
+ box.innerHTML=matches.map(b=>`<button type="button" class="bookSuggestion" onclick="chooseBook('${b.replaceAll("'","\\'")}')">${esc(b)}</button>`).join("");
+}
+function chooseBook(book){let el=document.querySelector("#ref");el.value=book+" ";el.focus();document.querySelector("#bookSuggestions").innerHTML=""}
 function passageFromRef(ref){let p=parseRef(ref);if(!p)return null;let b=bookMatch(p.book);if(!b)return null;let ch=window.BIBLE_DATA.books[b].chapters[String(p.chapter)];if(!ch)return null;let a=[];for(let n=p.start;n<=p.end;n++){if(!ch[String(n)])return null;a.push(ch[String(n)])}return {text:a.join(" "),book:b,...p}}
 function fillPassage(){let x=passageFromRef(document.querySelector("#ref").value);let box=document.querySelector("#txt"),msg=document.querySelector("#lookupmsg");if(x){box.value=x.text;msg.textContent="WEBU text filled automatically."}else{msg.textContent="That passage is not in the installed Bible data yet. You can still paste the exact text."}}
 function addForm(){
- app(`${header(true)}<div class="card"><h2>Add a verse or passage</h2><form onsubmit="addVerse(event)">
- <label>Reference</label><div class="row"><input id="ref" placeholder="John 15:5" required><button class="btn" type="button" onclick="fillPassage()">Fill Verse</button></div><div id="lookupmsg" class="tiny">Enter a reference, then tap Fill Verse.</div>
+ app(`${header(true)}<div class="card"><h2>Add a verse or passage</h2><p class="muted">Know the reference? Start typing a Bible book and we’ll help you find it.</p><form onsubmit="addVerse(event)">
+ <label>Verse or passage</label><div class="row"><div class="referenceEntry"><input id="ref" placeholder="Start typing, for example: Joh…" autocomplete="off" oninput="showBookSuggestions(this.value)" required><div id="bookSuggestions" class="bookSuggestions"></div></div><button class="btn" type="button" onclick="fillPassage()">Find This Passage</button></div><div id="lookupmsg" class="tiny">After the book name, enter a chapter and verse, such as John 15:5.</div>
  <label>Translation</label><input id="trans" value="WEBU" readonly>
- <label>Scripture text</label><textarea id="txt" placeholder="WEBU text will fill automatically when available." required></textarea>
- <button class="btn primary wide" type="submit">Save & Start Learning</button></form><div class="discover"><h3>Find a passage</h3><div class="row"><button class="btn" onclick="go('themes')">Browse Suggested Verses</button><button class="btn" onclick="go('search')">Search the Bible</button></div></div></div>`)
+ <label>Scripture text</label><textarea id="txt" placeholder="The WEBU text will appear here when you find the passage." required></textarea>
+ <button class="btn primary wide" type="submit">Add to My Verses & Start Learning</button></form><div class="discover"><h3>Not sure which passage?</h3><p class="muted">Find Scripture by what’s on your heart or search the Bible for your own words.</p><div class="row"><button class="btn" onclick="go('themes')">Find Verses by Theme</button><button class="btn" onclick="go('search')">Search the Bible</button></div></div></div>`)
 }
 
 const THEME_VERSES={
- "Anxiety & Peace":["Philippians 4:6-7","Isaiah 41:10","John 14:27"],
- "Trusting God":["Proverbs 3:5-6","Psalm 37:5","Romans 8:28"],
- "Strength & Courage":["Joshua 1:9","Isaiah 40:31","Philippians 4:13"],
- "Faith":["Hebrews 11:1","Mark 11:24","2 Corinthians 5:7"],
- "God’s Love":["John 3:16","Romans 8:38-39","1 John 4:9-10"],
- "Forgiveness":["1 John 1:9","Ephesians 4:32","Colossians 3:13"],
- "Wisdom & Guidance":["James 1:5","Psalm 119:105","Proverbs 16:9"],
- "Temptation & Sin":["1 Corinthians 10:13","Psalm 119:11","James 1:21"],
- "Prayer":["Matthew 6:9-13","1 Thessalonians 5:16-18","Jeremiah 33:3"],
- "Hope":["Romans 15:13","Jeremiah 29:11","Psalm 42:11"],
- "Gratitude":["1 Thessalonians 5:18","Psalm 100:4-5","Colossians 3:17"],
- "Who I Am in Christ":["2 Corinthians 5:17","Ephesians 2:10","Galatians 2:20"]
+ "When You Need Peace":["Philippians 4:6-7","Isaiah 41:10","John 14:27"],
+ "Trusting God One Day at a Time":["Proverbs 3:5-6","Psalms 37:5","Romans 8:28"],
+ "Finding Strength & Courage":["Joshua 1:9","Isaiah 40:31","Philippians 4:13"],
+ "Growing in Faith":["Hebrews 11:1","Mark 11:24","2 Corinthians 5:7"],
+ "Resting in God’s Love":["John 3:16","Romans 8:38-39","1 John 4:9-10"],
+ "Giving & Receiving Forgiveness":["1 John 1:9","Ephesians 4:32","Colossians 3:13"],
+ "Seeking Wisdom & Guidance":["James 1:5","Psalms 119:105","Proverbs 16:9"],
+ "When You’re Facing Temptation":["1 Corinthians 10:13","Psalms 119:11","James 1:21"],
+ "Growing in Prayer":["Matthew 6:9-13","1 Thessalonians 5:16-18","Jeremiah 33:3"],
+ "Holding On to Hope":["Romans 15:13","Jeremiah 29:11","Psalms 42:11"],
+ "Living with Gratitude":["1 Thessalonians 5:18","Psalms 100:4-5","Colossians 3:17"],
+ "Your Identity in Christ":["2 Corinthians 5:17","Ephesians 2:10","Galatians 2:20"],
+ "When Your Heart Is Grieving":["Psalms 34:18","Matthew 5:4","Revelation 21:4"],
+ "When You Feel Alone":["Deuteronomy 31:8","Psalms 27:10","Hebrews 13:5"],
+ "Finding Rest":["Matthew 11:28-30","Psalms 23:1-3","Exodus 33:14"],
+ "Waiting with Patience":["Psalms 27:14","Isaiah 40:31","Romans 12:12"],
+ "Choosing Joy":["Psalms 16:11","John 15:11","Philippians 4:4"],
+ "Growing in Kindness & Compassion":["Ephesians 4:32","Colossians 3:12","Luke 6:36"],
+ "Loving Others Well":["1 Corinthians 13:4-7","Romans 12:10","Ephesians 4:2-3"],
+ "Caring for Your Family":["Deuteronomy 6:6-7","Proverbs 22:6","Colossians 3:20-21"],
+ "Bringing Faith into Your Work":["Colossians 3:23-24","Proverbs 16:3","Ephesians 2:10"],
+ "Learning Contentment":["Philippians 4:11-13","1 Timothy 6:6-8","Hebrews 13:5"],
+ "When Life Feels Overwhelming":["Psalms 61:2","Matthew 6:34","1 Peter 5:7"],
+ "When You Need Comfort & Healing":["Psalms 147:3","2 Corinthians 1:3-4","Psalms 103:2-3"],
+ "When You Have a Decision to Make":["Proverbs 3:5-6","James 1:5","Psalms 32:8"],
+ "Speaking with Grace":["Proverbs 15:1","Ephesians 4:29","James 1:19"],
+ "Walking Humbly with God":["Philippians 2:3-4","James 4:10","Micah 6:8"],
+ "Serving Others with Love":["Mark 10:45","Galatians 5:13","1 Peter 4:10"],
+ "Living Generously":["2 Corinthians 9:7","Luke 6:38","Proverbs 19:17"],
+ "Remembering God’s Faithfulness":["Lamentations 3:22-23","Deuteronomy 7:9","2 Timothy 2:13"],
+ "When You Need God’s Protection":["Psalms 91:1-2","Psalms 121:7-8","2 Thessalonians 3:3"],
+ "Beginning Again":["Isaiah 43:18-19","2 Corinthians 5:17","Lamentations 3:22-23"]
 };
 function suggestedThemes(){
  let html=Object.entries(THEME_VERSES).map(([theme,refs])=>`<div class="themeGroup"><h3>${esc(theme)}</h3>${refs.map(ref=>{let x=passageFromRef(ref);return `<button class="suggestion" onclick="addSuggested('${ref.replaceAll("'","\\'")}')"><b>${esc(ref)}</b>${x?`<span>${esc(x.text)}</span>`:""}</button>`}).join("")}</div>`).join("");
- app(`${header(true)}<div class="card"><h2>Suggested Verses by Theme</h2><p class="muted">Choose a passage to add it to your memorization list.</p>${html}</div>`)
+ app(`${header(true)}<div class="card"><h2>Find a Verse for What’s on Your Heart</h2><p class="muted">Browse a theme, then tap any passage you’d like to learn and remember.</p>${html}</div>`)
 }
 function addSuggested(ref){let x=passageFromRef(ref);if(!x)return alert("That passage could not be found in the installed WEBU Bible.");let existing=state.verses.find(v=>v.reference.toLowerCase()===ref.toLowerCase());if(existing)return go("practice",existing.id);let v={id:"v"+Date.now(),reference:ref,translation:"WEBU",text:x.text,notes:"",status:"new",due:today(),streak:0,created:new Date().toISOString()};state.verses.push(v);save();go("practice",v.id)}
 function bibleSearch(){
  let q=route.searchQuery||"",results=route.searchResults||[];
- let body=q?results.length?results.map(r=>`<div class="searchResult"><div class="ref">${esc(r.reference)}</div><p>${highlightTerms(r.text,q)}</p><button class="btn small primary" onclick="addSearchResult('${r.book.replaceAll("'","\\'")}',${r.chapter},${r.verse})">Memorize This Verse</button></div>`).join(""):`<div class="empty">No verses found for “${esc(q)}”. Try another word or phrase.</div>`:`<div class="empty">Search all 66 books of the installed WEBU Bible by a word or phrase.</div>`;
- app(`${header(true)}<div class="card"><h2>Search the Bible</h2><p class="muted">Searches stay on this device and work offline.</p><form class="searchForm" onsubmit="runBibleSearch(event)"><input id="bibleSearchInput" value="${esc(q)}" placeholder="peace, wisdom, fear, love…" required><button class="btn primary" type="submit">Search</button></form><div class="tiny searchCount">${q?`${results.length}${results.length===100?"+":""} result${results.length===1?"":"s"}`:""}</div>${body}</div>`)
+ let body=q?results.length?results.map(r=>`<div class="searchResult"><div class="ref">${esc(r.reference)}</div><p>${highlightTerms(r.text,q)}</p><button class="btn small primary" onclick="addSearchResult('${r.book.replaceAll("'","\\'")}',${r.chapter},${r.verse})">Add to My Verses</button></div>`).join(""):`<div class="empty">No verses found for “${esc(q)}”. Try another word or phrase.</div>`:`<div class="empty">Search all 66 books of the installed WEBU Bible by a word or phrase.</div>`;
+ app(`${header(true)}<div class="card"><h2>Search the Bible</h2><p class="muted">Search for a word or phrase that’s on your heart. Everything stays on this device and works offline.</p><form class="searchForm" onsubmit="runBibleSearch(event)"><input id="bibleSearchInput" value="${esc(q)}" placeholder="peace, wisdom, fear, love…" required><button class="btn primary" type="submit">Search</button></form><div class="tiny searchCount">${q?`${results.length}${results.length===100?"+":""} result${results.length===1?"":"s"}`:""}</div>${body}</div>`)
 }
 function runBibleSearch(e){e.preventDefault();let q=document.querySelector("#bibleSearchInput").value.trim();let terms=norm(q).split(" ").filter(Boolean),out=[];if(!terms.length)return;outer:for(const [book,bv] of Object.entries(window.BIBLE_DATA?.books||{})){for(const [chapter,ch] of Object.entries(bv.chapters||{})){for(const [verse,text] of Object.entries(ch)){let n=norm(text);if(terms.every(t=>n.includes(t))){out.push({book,chapter:+chapter,verse:+verse,reference:`${book} ${chapter}:${verse}`,text});if(out.length>=100)break outer}}}}route.searchQuery=q;route.searchResults=out;render()}
 function highlightTerms(text,q){let terms=norm(q).split(" ").filter(Boolean).sort((a,b)=>b.length-a.length);if(!terms.length)return esc(text);let safe=esc(text);for(const t of terms){let re=new RegExp(`(${t.replace(/[.*+?^${}()|[\\]\\]/g,"\\$&")})`,"gi");safe=safe.replace(re,"<mark>$1</mark>")}return safe}
@@ -104,7 +131,7 @@ function practice(id){
  if(route.mode==="test") body=route.result?testResult(v,route.result):`<p class="muted">Type the passage from memory. Capitalization and punctuation won't count against you.</p><textarea id="attempt" placeholder="Begin typing from memory…"></textarea><button class="btn primary wide" onclick="checkTest('${v.id}')">Check My Answer</button>`;
  app(`${header(true)}<div class="card"><div class="reference">${esc(v.reference)} · ${esc(v.translation||"")}</div>
  <div class="modebar"><button class="btn small ${route.mode==="learn"?"primary":""}" onclick="setMode('learn')">Learn</button><button class="btn small ${route.mode==="phrase"?"primary":""}" onclick="setMode('phrase')">Phrase Builder</button><button class="btn small ${route.mode==="hide"?"primary":""}" onclick="setMode('hide')">Hide Words</button><button class="btn small ${route.mode==="initials"?"primary":""}" onclick="setMode('initials')">First Letters</button><button class="btn small ${route.mode==="flash"?"primary":""}" onclick="setMode('flash')">Flash Cards</button><button class="btn small ${route.mode==="test"?"primary":""}" onclick="setMode('test')">Test Me</button></div>${body}<button class="btn contextToggle ${route.contextShown?"primary":""}" onclick="route.contextShown=!route.contextShown;render()">${route.contextShown?"Hide Verse in Context":"Show Verse in Context"}</button>${route.contextShown?`<div class="contextBox" onclick="openReader('${v.id}')">${contextHtml(v)}</div>`:""}<div class="notesBox"><h3 class="sectionTitle">My Notes</h3><p class="tiny">Private notes for this passage. Saved automatically on this device.</p><textarea class="noteArea" oninput="saveNote('${v.id}',this.value)" placeholder="Write what you notice, what you want to remember, or how this passage speaks to you…">${esc(v.notes||"")}</textarea></div></div>
- <div class="card"><h3>How did you do?</h3><div class="row stack"><button class="btn" onclick="rate('${v.id}','again')">Again</button><button class="btn" onclick="rate('${v.id}','almost')">Almost</button><button class="btn primary" onclick="rate('${v.id}','gotit')">Got It</button></div></div>`)
+ <div class="card"><h3>How did that feel?</h3><div class="row stack"><button class="btn" onclick="rate('${v.id}','again')">Keep Practicing</button><button class="btn" onclick="rate('${v.id}','almost')">Almost There</button><button class="btn primary" onclick="rate('${v.id}','gotit')">I Know It</button></div></div>`)
 }
 function contextHtml(v){
  let p=parseRef(v.reference); if(!p)return `<h3 class="sectionTitle">Read in Context</h3><p class="muted">Open the Bible reader to read around this passage.</p><div class="contextHint">Tap to open Bible Reader →</div>`;
