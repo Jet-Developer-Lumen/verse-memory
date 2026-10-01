@@ -1,30 +1,24 @@
-# Verse Memory V1
+# Verse Memory V1.2
 
-A small local-first Scripture memorization PWA designed as a future free resource from LumenStance.
+A private, local-first Scripture memorization PWA from LumenStance.
 
-## Included
-- Add your own verse or passage and translation
-- Learn mode
-- Phrase Builder
-- Hide Words (25%, 50%, 75%)
-- First Letters
-- Test Me with approximate word-by-word scoring
-- Again / Almost / Got It review scheduling
-- Local browser storage
-- JSON backup and restore
-- Offline service worker
-- Installable PWA manifest
-- Starter passage: James 1:21 WEBU
+## V1.2 includes
+- Complete 66-book World English Bible Updated (WEBU) text bundled for offline use
+- Add a verse or passage by reference and auto-fill its WEBU text
+- Read in Context beneath each memorization passage
+- Full Bible Reader with book/chapter navigation
+- Select a verse in the reader and add it to memorization
+- Passage-specific My Notes, saved automatically on the device
+- Learn, Phrase Builder, Hide Words, First Letters, and Test Me practice modes
+- Spaced review feedback: Again, Almost, Got It
+- Local backup and restore
+- LumenStance mark on the home screen
 
-## Important
-The starter James 1:21 text should be verified against the exact WEBU wording Janette wants before public distribution.
+## Privacy
+Verse libraries, notes, and practice history are stored locally in the browser on the user's device. No account is required by this version.
 
-## Local testing
-Serve this folder through a local web server. Service workers do not work reliably by opening index.html directly as a file.
-Example:
-python -m http.server 8080
+## Scripture
+World English Bible Updated (WEBU), 66-book canon-only read-aloud chapter package supplied from eBible.org. WEBU is public domain.
 
-Then visit http://localhost:8080
-
-## iPad installation
-For a real iPad installation, deploy the folder over HTTPS, open it in Safari, then use Share > Add to Home Screen.
+## Hosting
+Serve over HTTPS (for example GitHub Pages) so the service worker and installable PWA features work correctly.
