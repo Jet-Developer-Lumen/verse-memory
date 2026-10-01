@@ -1,0 +1,21 @@
+{
+  "name": "Verse Memory \u2014 A Gift from LumenStance",
+  "short_name": "Verse Memory",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffcee",
+  "theme_color": "#fffcee",
+  "description": "A private, offline Scripture memorization app.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
